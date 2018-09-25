@@ -34,17 +34,11 @@ c         if p=2pidx/L, the response is (1-sin^16 p/2)U_j, so          c
 c         eliminates L=2dx (highest wave number) and damps 4dx         c
 c         see Kalnay's book p. 102 (27 April 06 commented out for a check)  c                          
 c        . A B An Bn Ap Bp welp are loaned to do something else now         c
-c        .weln vrms defined to stored new kinds of calc. concerning b.l's   c
-c        .look for aug06 for removing unnecessary repeated calculationsc
-c         in relax2 and relax3                                         c
-c        .look for aug06 for for the removed trans1 calls in relax2,   c 
-c         relax3. corser and finer                                     c
-c        .14aug06 put in OpenMP directives to solve Poisson2 and       c
-c         Poisson3 separately in two threads                           c                         
+c        .weln vrms defined to stored new kinds of calc. concerning b.l's   c                         
 c----------------------------------------------------------------------c
 c
       implicit real*8(a-h,o-z)
-      parameter(kr=420,kz=65,kp=3600,mgen=100000)
+      parameter(kr=281,kz=65,kp=1210,mgen=100000)
       real*8 An(0:kr,1,0:kp),A(0:kr,1,0:kp),Ap(0:kr,1,0:kp)
       real*8 Bn(0:kr,1,0:kp),B(0:kr,1,0:kp),Bp(0:kr,1,0:kp)
       real*8 Cn(0:kr,1,0:kp),C(0:kr,1,0:kp),Cp(0:kr,1,0:kp)
@@ -57,8 +51,8 @@ c
 !mpk2d for output 
       real*4 r4out(1:82)
       real*8 ssumc(6,mgen),ssums(6,mgen)
-      character*30 fname1,fname2,fname3,fname4,fname5
-      character*30 fname6,fname7,fname8,fname9,ans
+      character*20 fname1,fname2,fname3,fname4,fname5
+      character*20 fname6,fname7,fname8,fname9,ans
       common/grals/ssumc,ssums
       common/val/Ra,Re,Ptl,Gr
       common/sol1/An,A,Ap,Bn,B,Bp,Cn,C,Cp
@@ -245,72 +239,58 @@ c
       if(ans .ne. 'no')then
         print*,'filename for vorticity A: '
         read*,fname9
-c14aug06        open(11,file=fname9,form='unformatted')
+        open(11,file=fname9,form='unformatted')
 !mpk2d        read(11)nr,nz,np
 !mpk2d         read(11)rmax,r0,zmax,zmin
-c14aug06        read(11)(((A(i,j,k),i=0,nr+1),j=1,1),k=0,np)
-        open(11,file=fname9,status='unknown')
-        read(11,201)(((A(i,j,k),i=0,nr+1),j=1,1),k=0,np)
+        read(11)(((A(i,j,k),i=0,nr+1),j=1,1),k=0,np)
         close(11)
 c
         print*,'filename for vorticity B: '
         read*,fname9
-c14aug06        open(11,file=fname9,form='unformatted')
+        open(11,file=fname9,form='unformatted')
 !mpk2d         read(11)nr,nz,np
 !mpk2d         read(11)rmax,r0,zmax,zmin
-c14aug06        read(11)(((B(i,j,k),i=0,nr),j=1,1),k=0,np)
-        open(11,file=fname9,status='unknown')
-        read(11,201)(((B(i,j,k),i=0,nr),j=1,1),k=0,np)
+        read(11)(((B(i,j,k),i=0,nr),j=1,1),k=0,np)
         close(11)
 c
         print*,'filename for vorticity C: '
         read*,fname9
-c14aug06        open(11,file=fname9,form='unformatted')
+        open(11,file=fname9,form='unformatted')
 !mpk2d         read(11)nr,nz,np
 !mpk2d         read(11)rmax,r0,zmax,zmin
-c14aug06        read(11)(((C(i,j,k),i=0,nr),j=1,1),k=0,np)
-        open(11,file=fname9,status='unknown')
-        read(11,201)(((C(i,j,k),i=0,nr),j=1,1),k=0,np)
+        read(11)(((C(i,j,k),i=0,nr),j=1,1),k=0,np)
         close(11)
 c
         print*,'filename for velocity u: '
         read*,fname9
-c14aug06         open(11,file=fname9,form='unformatted')
+         open(11,file=fname9,form='unformatted')
 !mpk2d         read(11)nr,nz,np
 !mpk2d         read(11)rmax,r0,zmax,zmin
-c14aug06        read(11)(((uel(i,j,k),i=0,nr),j=1,1),k=0,np)
-        open(11,file=fname9,status='unknown')
-        read(11,201)(((uel(i,j,k),i=0,nr),j=1,1),k=0,np)
+        read(11)(((uel(i,j,k),i=0,nr),j=1,1),k=0,np)
         close(11)
 c
         print*,'filename for velocity v: '
         read*,fname9
-c14aug06         open(11,file=fname9,form='unformatted')
+        open(11,file=fname9,form='unformatted')
 !mpk2d         read(11)nr,nz,np
 !mpk2d         read(11)rmax,r0,zmax,zmin
-c14aug06         read(11)(((vel(i,j,k),i=0,nr+1),j=1,1),k=0,np)
-        open(11,file=fname9,status='unknown')
-        read(11,201)(((vel(i,j,k),i=0,nr+1),j=1,1),k=0,np)
+        read(11)(((vel(i,j,k),i=0,nr+1),j=1,1),k=0,np)
         close(11)
 c
         print*,'filename for velocity w: '
         read*,fname9
-c14aug06        open(11,file=fname9,form='unformatted')
+        open(11,file=fname9,form='unformatted')
 !mpk2d         read(11)nr,nz,np
 !mpk2d         read(11)rmax,r0,zmax,zmin
-c14aug06        read(11)(((wel(i,j,k),i=0,nr+1),j=1,1),k=0,np)
-        open(11,file=fname9,status='unknown')
-        read(11,201)(((wel(i,j,k),i=0,nr+1),j=1,1),k=0,np)
+        read(11)(((wel(i,j,k),i=0,nr+1),j=1,1),k=0,np)
         close(11)
 c
         print*,'filename for temperature: '
         read*,fname9
-c14aug06        open(11,file=fname9,form='unformatted')
+        open(11,file=fname9,form='unformatted')
 !mpk2d         read(11)nr,nz,np
 !mpk2d         read(11)rmax,r0,zmax,zmin
-c14aug06        read(11)(((th(i,j,k),i=0,nr+1),j=1,1),k=0,np)
-        open(11,file=fname9,status='unknown')
-        read(11,201)(((th(i,j,k),i=0,nr+1),j=1,1),k=0,np)
+        read(11)(((th(i,j,k),i=0,nr+1),j=1,1),k=0,np)
         close(11)
 c
       endif
@@ -368,18 +348,10 @@ cmpk don't want this now      open(12,file='thcvorttseriesfiner.dat',status='unk
 !mpk don't need this right now        call aaaaaaaa(ntot+kt)
 !mpk2d        call rhsw(wrh)
 !mpk2d        call poisson1(wel,welp,wrh,nr,nz,np,dr,dz,dp,nlev)
-
-ccc!$OMP PARALLEL    
-
-ccc!$OMP sections
         call rhsv(vrh)
         call poisson2(vel,velp,vrh,nr,nz,np,dr,dz,dp,nlev)
-ccc!$OMP section
         call rhsu(urh)
         call poisson3(uel,uelp,urh,nr,nz,np,dr,dz,dp,nlev)
-ccc!$OMP end sections      
-        
-ccc!$OMP END PARALLEL 
         call update
 c
 !mpk2d  httrans(ntot+kt)=-r0*dlog(r0/rmax)*trans1/(zmax*2.d0*pi)
@@ -390,8 +362,6 @@ c
 c
        if(mod(kt,50).eq.0)then
         print*,httrans(ntot+kt),httrans2(ntot+kt),ntot+kt
-        print*,'CFLMAXU=',cflmaxu
-        print*,'CFLMAXV=',cflmaxv
 !mpk2d        call rufcon(th,nr+1,nz+1,np)
        endif
 cmpk don't want this now see above too       if(mod(kt,10).eq.0)then
@@ -431,7 +401,7 @@ c       endif
        if(cflmaxu.gt.1.)then
         print*,'WARNING! CFL EXCEEDED!'
        endif
-!mpk       print*,'CFLMAXU=',cflmaxu
+       print*,'CFLMAXU=',cflmaxu
 
        cflmaxv=0.d0
        do i=1,nr-1
@@ -454,7 +424,7 @@ c       endif
        if(cflmaxv.gt.1.)then
         print*,'WARNING! CFL EXCEEDED!'
        endif
-!mpk       print*,'CFLMAXV=',cflmaxv
+       print*,'CFLMAXV=',cflmaxv
        
 !mpk       if (kt.ge.10)then
 !mpk        if(cflmaxu.gt.cflmaxv)then
@@ -495,69 +465,55 @@ c     Write vorticity, stream function, velocity and temperature data c
 c     to file                                                         c
 c---------------------------------------------------------------------c
 c
-c14aug06      open(11,file=fname1,form='unformatted')
+      open(11,file=fname1,form='unformatted')
 !mpk2d      write(11)nr,nz,np
 !mpk2d      write(11)rmax,r0,zmax,zmin
-c14aug06      write(11)(((A(i,j,k),i=0,nr+1),j=1,1),k=0,np)
-      open(11,file=fname1,status='unknown')
-      write(11,201)(((A(i,j,k),i=0,nr+1),j=1,1),k=0,np)
+      write(11)(((A(i,j,k),i=0,nr+1),j=1,1),k=0,np)
       close(11)
 c
-c14aug06      open(11,file=fname2,form='unformatted')
+      open(11,file=fname2,form='unformatted')
 !mpk2d      write(11)nr,nz,np
 !mpk2d      write(11)rmax,r0,zmax,zmin
-c14aug06      write(11)(((B(i,j,k),i=0,nr),j=1,1),k=0,np)
-      open(11,file=fname2,status='unknown')
-      write(11,201)(((B(i,j,k),i=0,nr),j=1,1),k=0,np)
+      write(11)(((B(i,j,k),i=0,nr),j=1,1),k=0,np)
       close(11)
 c
-c14aug06      open(11,file=fname3,form='unformatted')
+      open(11,file=fname3,form='unformatted')
 !mpk2d      write(11)nr,nz,np
 !mpk2d      write(11)rmax,r0,zmax,zmin
-c14aug06      write(11)(((C(i,j,k),i=0,nr),j=1,1),k=0,np)
-      open(11,file=fname3,status='unknown')
-      write(11,201)(((C(i,j,k),i=0,nr),j=1,1),k=0,np) 
+      write(11)(((C(i,j,k),i=0,nr),j=1,1),k=0,np)
       close(11)
 c
-c14aug06      open(11,file=fname4,form='unformatted')
+      open(11,file=fname4,form='unformatted')
 !mpk2d      write(11)nr,nz,np
 !mpk2d      write(11)rmax,r0,zmax,zmin
-c14aug06      write(11)(((uel(i,j,k),i=0,nr),j=1,1),k=0,np)
-      open(11,file=fname4,status='unknown')
-      write(11,201)(((uel(i,j,k),i=0,nr),j=1,1),k=0,np)
+      write(11)(((uel(i,j,k),i=0,nr),j=1,1),k=0,np)
       close(11)
 c
-c14aug06      open(11,file=fname5,form='unformatted')
+      open(11,file=fname5,form='unformatted')
 !mpk2d      write(11)nr,nz,np
 !mpk2d      write(11)rmax,r0,zmax,zmin
-c14aug06      write(11)(((vel(i,j,k),i=0,nr+1),j=1,1),k=0,np)
-      open(11,file=fname5,status='unknown')
-      write(11,201)(((vel(i,j,k),i=0,nr+1),j=1,1),k=0,np)
+      write(11)(((vel(i,j,k),i=0,nr+1),j=1,1),k=0,np)
       close(11)
 c
-c14aug06      open(11,file=fname6,form='unformatted')
+      open(11,file=fname6,form='unformatted')
 !mpk2d      write(11)nr,nz,np
 !mpk2d      write(11)rmax,r0,zmax,zmin
-c14aug06      write(11)(((wel(i,j,k),i=0,nr+1),j=1,1),k=0,np)
-      open(11,file=fname6,status='unknown')
-      write(11,201)(((wel(i,j,k),i=0,nr+1),j=1,1),k=0,np)
+      write(11)(((wel(i,j,k),i=0,nr+1),j=1,1),k=0,np)
       close(11)
 c
 !mpk2d       open(11,file=fname7,form='unformatted',access='sequential'
 !mpk2d      +     ,status='new')
-c14aug06            open(11,file=fname7,form='unformatted')
+            open(11,file=fname7,form='unformatted')
 !mpk2d      write(11)nr,nz,np
 !mpk2d      write(11)rmax,r0,zmax,zmin
 !mpk2d      write(11,201)(((th(i,j,k),i=0,nr+1),j=1,1),k=0,np)
-c14aug06           write(11)(((th(i,j,k),i=0,nr+1),j=1,1),k=0,np)
+            write(11)(((th(i,j,k),i=0,nr+1),j=1,1),k=0,np)
 !mpk2d        do ken=0,np
 !mpk2d          do ien=0,nr+1
 !mpk2d            r4out(ien+1)=th(ien,1,ken)
 !mpk2d          enddo
 !mpk2d           write(11)r4out 
 !mpk2d        enddo
-      open(11,file=fname7,status='unknown')
-      write(11,201)(((th(i,j,k),i=0,nr+1),j=1,1),k=0,np)
       close(11)
 c
       if(fname8 .ne. 'no')then
@@ -570,7 +526,7 @@ c
 
 c
   200  format(14(1x,e16.8))
-  201  format(1(1x,e16.10))
+  201  format(12(1x,e16.8))
   202  format(3(1x,e16.8))
 c---------------------------------------------writing to files ends
       
@@ -596,7 +552,7 @@ c
       subroutine Cvorticity1
 c   
       implicit real*8(a-h,o-z)
-      parameter(kr=420,kz=33,kp=3600,mgen=100000)
+      parameter(kr=281,kz=33,kp=1210,mgen=100000)
       real*8 An(0:kr,1,0:kp),A(0:kr,1,0:kp),Ap(0:kr,1,0:kp)
       real*8 Bn(0:kr,1,0:kp),B(0:kr,1,0:kp),Bp(0:kr,1,0:kp)
       real*8 Cn(0:kr,1,0:kp),C(0:kr,1,0:kp),Cp(0:kr,1,0:kp)
@@ -778,10 +734,8 @@ c forward timestepping just for first timestep
         ULT=(u*Cr+v*Ch*ri)/Ptl
         RHS2=-Ra*thh+2.d0*Ra*(-thr*u-thh*v*ri)/Re/Ptl
         cf1=1.d0/(Ptl*dt)-cnr-cnh
-cfully leapfrog        cf1=1.d0/(Ptl*dt)
         cf2=cnr+cnh
         Cn(i,j,k)=(cf2*Cp(i,j,k)-ULT-RHS2+RHS1)/cf1
-cfully leapfrog        Cn(i,j,k)=(2.d0*cf2*Cp(i,j,k)-ULT-RHS2+RHS1)/cf1
 c
   10  continue
 c
@@ -797,7 +751,7 @@ c
       subroutine Cvorticity
 c   
       implicit real*8(a-h,o-z)
-      parameter(kr=420,kz=33,kp=3600,mgen=100000)
+      parameter(kr=281,kz=33,kp=1210,mgen=100000)
       real*8 An(0:kr,1,0:kp),A(0:kr,1,0:kp),Ap(0:kr,1,0:kp)
       real*8 Bn(0:kr,1,0:kp),B(0:kr,1,0:kp),Bp(0:kr,1,0:kp)
       real*8 Cn(0:kr,1,0:kp),C(0:kr,1,0:kp),Cp(0:kr,1,0:kp)
@@ -908,10 +862,9 @@ c
       enddo
 
 !mpk2d----------------------------------------timestep begins 
-!mpksept06      do 10 i=1,nr-1
+      do 10 i=1,nr-1
 !mpk2d      do 10 j=1,nz
       do 10 k=0,np
-      do 10 i=1,nr-1
 c
         ip=i+1
         im=i-1
@@ -982,10 +935,8 @@ c back to truly leapfrog/Dufort-Frankel
         ULT=(u*Cr+v*Ch*ri)/Ptl
         RHS2=-Ra*thh+2.d0*Ra*(-thr*u-thh*v*ri)/Re/Ptl
         cf1=0.5d0/(Ptl*dt)-cnr-cnh
-cfully leapfrog        cf1=0.5d0/(Ptl*dt)
         cf2=cnr+cnh
         Cn(i,j,k)=(cf2*Cp(i,j,k)-ULT-RHS2+RHS1)/cf1
-cfully leapfrog         Cn(i,j,k)=(2.d0*cf2*C(i,j,k)-ULT-RHS2+RHS1)/cf1
         
 !mpk also stored in loaned Ap for the Shapiro filter below
         Ap(i,j,k)=Cn(i,j,k)
@@ -997,9 +948,8 @@ c
 !mpk DU_j=0.25(U_{j+1}-2U_{j}+U_{j-1}) is applied to the original 
 !mpk field n times. 2n = 16 is good. reduce norder for high resolution 
 
-coct06 applied in tangential dir only; there is also problem with upper bc when
-capplying in the radial dir.
-c        do norder=1,4
+
+c        do norder=1,6
 
 !mpk first applied in r direction and stored in An
 c         do k=0,np
@@ -1023,36 +973,36 @@ c         enddo
 c        enddo
         
 !mpk then applied in tangential direction and stored back to Ap  
-c        do norder=1,4
-c     
+c        do norder=1,8
+      
+c         do i=1,nr-1
+c          do k=0,np
+c           km=k-1
+c           ka=k+1
+c           if(k.eq.0)km=np-1
+c           if(k.eq.np)ka=1          
+c            An(i,j,k)=-0.25d0*(Ap(i,j,ka)-2.d0*Ap(i,j,k)+Ap(i,j,km))
+c          enddo
+c         enddo
+
+c         do k=0,np
+c          do i=1,nr-1
+c           Ap(i,j,k)=An(i,j,k)
+c           enddo
+c         enddo
+
+c        enddo
+      
 c        do i=1,nr-1
 c         do k=0,np
-c          km=k-1
-c          ka=k+1
-c          if(k.eq.0)km=np-1
-c          if(k.eq.np)ka=1          
-c           An(i,j,k)=-0.25d0*(Ap(i,j,ka)-2.d0*Ap(i,j,k)+Ap(i,j,km))
+c          Cn(i,j,k)=Cn(i,j,k)-Ap(i,j,k)
 c         enddo
 c        enddo
-c
-c        do k=0,np
-c         do i=1,nr-1
-c          Ap(i,j,k)=An(i,j,k)
-c          enddo
-c        enddo
-c
-c
-c     
-c       do i=1,nr-1
-c        do k=0,np
-c         Cn(i,j,k)=Cn(i,j,k)-Ap(i,j,k)
-c        enddo
-c       enddo
 
 !mpk Robert filter
         do i=1,nr-1
          do k=0,np
-          C(i,j,k)=C(i,j,k)+0.05d0*(Cn(i,j,k)-2.d0*C(i,j,k)+Cp(i,j,k))
+          C(i,j,k)=C(i,j,k)+0.01d0*(Cn(i,j,k)-2.d0*C(i,j,k)+Cp(i,j,k))
          enddo
         enddo
    
@@ -1068,7 +1018,7 @@ c
       subroutine temperature1
 c
       implicit real*8(a-h,o-z)
-      parameter(kr=420,kz=33,kp=3600,mgen=100000)
+      parameter(kr=281,kz=33,kp=1210,mgen=100000)
       real*8 An(0:kr,1,0:kp),A(0:kr,1,0:kp),Ap(0:kr,1,0:kp)
       real*8 Bn(0:kr,1,0:kp),B(0:kr,1,0:kp),Bp(0:kr,1,0:kp)
       real*8 Cn(0:kr,1,0:kp),C(0:kr,1,0:kp),Cp(0:kr,1,0:kp)
@@ -1171,9 +1121,7 @@ c
          thra=(-4.d0*th(i-1,j,k)/3.d0+th(i+1,j,k)/3.d0)*dri
 !mpk2d         thr=(-4.d0*th(i-1,j,k)/3.d0+th(i,j,k)+th(i+1,j,k)/3.d0)*dri
           thr=A(i,j,k)
-!mpk 11aug07 bug fixed i
-          cnr=-2.5d0*dri**2+0.5d0*dri*ri
-!mpk 11aug07
+          cnr=-2.5d0*dri**2+0.5d0*dr*ri
         elseif(i.eq.nr)then
           thrra=(3.2d0*th(i+1,j,k)+2.d0*th(i-1,j,k)-0.2d0*th(i-2,j,k))*
      +          dri**2
@@ -1214,11 +1162,9 @@ c
 c just for the first timestep, forward timestepping
         RHS1=thrra+thra*ri+thhha*ri**2+th(i,j,k)/dt  
         ULT=u*thr+v*thh*ri
-         cf1=1.d0/dt-cnr-cnp
-cfully leapfrog        cf1=1.d0/dt
+        cf1=1.d0/dt-cnr-cnp
         cf2=cnr+cnp
-       thn(i,j,k)=(cf2*thp(i,j,k)-ULT+RHS1)/cf1
-cfully leapfrog        thn(i,j,k)=(2.d0*cf2*thp(i,j,k)-ULT+RHS1)/cf1
+        thn(i,j,k)=(cf2*thp(i,j,k)-ULT+RHS1)/cf1
 c
   10  continue
 c
@@ -1234,7 +1180,7 @@ c
       subroutine temperature
 c
       implicit real*8(a-h,o-z)
-      parameter(kr=420,kz=33,kp=3600,mgen=100000)
+      parameter(kr=281,kz=33,kp=1210,mgen=100000)
       real*8 An(0:kr,1,0:kp),A(0:kr,1,0:kp),Ap(0:kr,1,0:kp)
       real*8 Bn(0:kr,1,0:kp),B(0:kr,1,0:kp),Bp(0:kr,1,0:kp)
       real*8 Cn(0:kr,1,0:kp),C(0:kr,1,0:kp),Cp(0:kr,1,0:kp)
@@ -1303,10 +1249,9 @@ c
       enddo
 
 !mpk2d------------------------------------------timestep begins
-!mpksept06      do 10 i=1,nr
+      do 10 i=1,nr
 !mpk2d      do 10 j=0,nz+1
       do 10 k=0,np
-      do 10 i=1,nr
 c
         ip=i+1
         im=i-1
@@ -1338,9 +1283,7 @@ c
          thra=(-4.d0*th(i-1,j,k)/3.d0+th(i+1,j,k)/3.d0)*dri
 !mpk2d         thr=(-4.d0*th(i-1,j,k)/3.d0+th(i,j,k)+th(i+1,j,k)/3.d0)*dri
          thr=A(i,j,k)
-!mpk 11aug07 bug fixed i
-          cnr=-2.5d0*dri**2+0.5d0*dri*ri
-!mpk
+          cnr=-2.5d0*dri**2+0.5d0*dr*ri
         elseif(i.eq.nr)then
           thrra=(3.2d0*th(i+1,j,k)+2.d0*th(i-1,j,k)-0.2d0*th(i-2,j,k))*
      +          dri**2
@@ -1383,7 +1326,6 @@ c  back to truly leapfrog/Dufort-Frankel
         RHS1=thrra+thra*ri+thhha*ri**2+0.5d0*thp(i,j,k)/dt  
         ULT=u*thr+v*thh*ri
         cf1=0.5d0/dt-cnr-cnp
-cfully leapfrog        cf1=0.5d0/dt
         cf2=cnr+cnp
         thn(i,j,k)=(cf2*thp(i,j,k)-ULT+RHS1)/cf1
 
@@ -1396,62 +1338,61 @@ c
 !mpk \bar U^{2n}_{j} = [1-(-D^n)]U_j, where diffusion operator 
 !mpk DU_j=0.25(U_{j+1}-2U_{j}+U_{j-1}) is applied to the original 
 !mpk field n times, you may reduce n for high grid resolution run
-
-coct06 applied to tangential dir only; there is also problem with upper bc 
-cwhen applying in radial dir 
-c       do norder=1,4
-!mpk first applied it in r direction 
-c         do k=0,np
-c          do i=1,nr
-c            An(i,j,k)=-0.25d0*(Ap(i+1,j,k)-2.d0*Ap(i,j,k)+Ap(i-1,j,k))
-c          enddo
-c         enddo
-
-c         do k=0,np
-c          do i=1,nr
-c            Ap(i,j,k)=An(i,j,k)
-c          enddo
-c         enddo
  
-c        enddo
+!mpk commented to check 24 April 2006 
+!       do norder=1,6
+!mpk first applied it in r direction 
+!         do k=0,np
+!          do i=1,nr
+!            An(i,j,k)=-0.25d0*(Ap(i+1,j,k)-2.d0*Ap(i,j,k)+Ap(i-1,j,k))
+!          enddo
+!         enddo
+
+!         do k=0,np
+!          do i=1,nr
+!            Ap(i,j,k)=An(i,j,k)
+!          enddo
+!         enddo
+ 
+!        enddo
 
 !mpk stored filtered field in Ap
-c        do i=1,nr
-c         do k=0,np
-c          Ap(i,j,k)=thn(i,j,k)-Ap(i,j,k)
-c         enddo
-c        enddo
+!        do i=1,nr
+!         do k=0,np
+!          Ap(i,j,k)=thn(i,j,k)-Ap(i,j,k)
+!         enddo
+!        enddo
 
 !mpk then applied in tangential direction    
-c        do norder=1,4        
-c        do i=1,nr
-c         do k=0,np
-c          km=k-1
-c          ka=k+1
-c          if(k.eq.0)km=np-1
-c          if(k.eq.np)ka=1          
-c           An(i,j,k)=-0.25d0*(Ap(i,j,ka)-2.d0*Ap(i,j,k)+Ap(i,j,km))
-c         enddo
-c        enddo
+!        do norder=1,6        
+!         do i=1,nr
+!          do k=0,np
+!           km=k-1
+!           ka=k+1
+!           if(k.eq.0)km=np-1
+!           if(k.eq.np)ka=1          
+!            An(i,j,k)=-0.25d0*(Ap(i,j,ka)-2.d0*Ap(i,j,k)+Ap(i,j,km))
+!          enddo
+!         enddo
 
-c        do k=0,np
-c         do i=1,nr
-c          Ap(i,j,k)=An(i,j,k)
-c         enddo
-c        enddo
-c
-c       enddo
-c     
-c       do i=1,nr
-c        do k=0,np
-c         thn(i,j,k)=thn(i,j,k)-Ap(i,j,k)
-c        enddo
-c       enddo
+!         do k=0,np
+!          do i=1,nr
+!            Ap(i,j,k)=An(i,j,k)
+!          enddo
+!         enddo
+
+!        enddo
+      
+!        do i=1,nr
+!         do k=0,np
+!          thn(i,j,k)=thn(i,j,k)-Ap(i,j,k)
+!         enddo
+!        enddo
 
 !mpk Robert filter
       do i=1,nr
        do k=0,np
-        th(i,j,k)=th(i,j,k)+0.05d0*(thn(i,j,k)-2.d0*th(i,j,k)
+        th(i,j,k)=th(i,j,k)+0.01d0*(thn(i,j,k)-2.d0*th(i,j,k)
      +            +thp(i,j,k))
        enddo
       enddo
@@ -1469,7 +1410,7 @@ c
       subroutine heat(trans1,trans2)
 c
       implicit real*8(a-h,o-z)
-      parameter(kr=420,kz=33,kp=3600,mgen=100000)
+      parameter(kr=281,kz=33,kp=1210,mgen=100000)
       real*8 thn(0:kr,1,0:kp),th(0:kr,1,0:kp),thp(0:kr,1,0:kp)
       common/sol2/thn,th,thp
       common/num/dt,dr,dz,dp,nr,nz,np
@@ -1574,7 +1515,7 @@ c
       subroutine update
 c
       implicit real*8(a-h,o-z)
-      parameter(kr=420,kz=33,kp=3600,mgen=100000)
+      parameter(kr=281,kz=33,kp=1210,mgen=100000)
       real*8 An(0:kr,1,0:kp),A(0:kr,1,0:kp),Ap(0:kr,1,0:kp)
       real*8 Bn(0:kr,1,0:kp),B(0:kr,1,0:kp),Bp(0:kr,1,0:kp)
       real*8 Cn(0:kr,1,0:kp),C(0:kr,1,0:kp),Cp(0:kr,1,0:kp)
@@ -1647,7 +1588,7 @@ c----------------------------------------------------------------------c
 c----------------------------------------------------------------------c
 c
       implicit real*8(a-h,o-z)
-      parameter(kr=420,kz=33,kp=3600,mgen=100000)
+      parameter(kr=281,kz=33,kp=1210,mgen=100000)
       real*8 An(0:kr,1,0:kp),A(0:kr,1,0:kp),Ap(0:kr,1,0:kp)
       real*8 Bn(0:kr,1,0:kp),B(0:kr,1,0:kp),Bp(0:kr,1,0:kp)
       real*8 Cn(0:kr,1,0:kp),C(0:kr,1,0:kp),Cp(0:kr,1,0:kp)
@@ -1693,7 +1634,7 @@ c----------------------------------------------------------------------c
 c----------------------------------------------------------------------c
 c
       implicit real*8(a-h,o-z)
-      parameter(kr=420,kz=33,kp=3600,mgen=100000)
+      parameter(kr=281,kz=33,kp=1210,mgen=100000)
       real*8 An(0:kr,1,0:kp),A(0:kr,1,0:kp),Ap(0:kr,1,0:kp)
       real*8 Bn(0:kr,1,0:kp),B(0:kr,1,0:kp),Bp(0:kr,1,0:kp)
       real*8 Cn(0:kr,1,0:kp),C(0:kr,1,0:kp),Cp(0:kr,1,0:kp)
@@ -1739,7 +1680,7 @@ c     Multigrid subroutine for the Poisson equation, 4 levels, G-S relax
 c----------------------------------------------------------------------c
 c
       implicit real*8(a-h,o-z)
-      parameter(kr=420,kz=33,kp=3600,mgen=2000000)
+      parameter(kr=281,kz=33,kp=1210,mgen=500000)
       real*8 v(mgen),f(mgen)
       real*8 psic(0:kr,1,0:kp),psif(0:kr,1,0:kp)
       real*8 rc(0:kr,1,0:kp),rf(0:kr,1,0:kp),tempa(0:kr,1,0:kp)
@@ -1775,7 +1716,7 @@ c     print*,itest,itest2,jtest,jtest2
       print*,'possible number of MG levels=',nlev
 !mpk2d high resolution so more levels should be fine but i try to limit
 !it because there may be a numerical instability issue.
-      if(nlev.gt.5)nlev=5
+      if(nlev.gt.4)nlev=4
       print*,'but i limit the number of MG levels=',nlev
 c
       ii=1
@@ -1811,7 +1752,7 @@ c     Multigrid subroutine for the Poisson equation, 4 levels, G-S relax
 c----------------------------------------------------------------------c
 c
       implicit real*8(a-h,o-z)
-      parameter(kr=420,kz=33,kp=3600,mgen=2000000)
+      parameter(kr=281,kz=33,kp=1210,mgen=500000)
       real*8 psi(0:kr,1,0:kp),psip(0:kr,1,0:kp)
       real*8 rhs(0:kr,1,0:kp)
       real*8 v(mgen),f(mgen)
@@ -1824,7 +1765,6 @@ c
       common /step/hr,hz,hp,hhr,hhz,hhp
       common /ints/ibeg,n1,n2,n3
       common /radius/r0,rmax
-ccc!$OMP THREADPRIVATE(/backup/,/arrays/)
 c
       nvs=10000
       nrel1=1
@@ -1851,7 +1791,7 @@ c
       call trans1(psif,v,ibeg(1),n1(1),n2(1),n3(1))
 c
       do 50 i=1,nvs
-c15aug06        if(i.gt.500)stop
+        if(i.gt.500)stop
 c       print*,'Sweep ',i
       if(i.ne.1)then
         do 31 is=0,nr+1
@@ -1942,7 +1882,7 @@ c     Multigrid subroutine for the Poisson equation, 4 levels, G-S relax
 c----------------------------------------------------------------------c
 c
       implicit real*8(a-h,o-z)
-      parameter(kr=420,kz=33,kp=3600,mgen=2000000)
+      parameter(kr=281,kz=33,kp=1210,mgen=500000)
       real*8 psi(0:kr,1,0:kp),psip(0:kr,1,0:kp)
       real*8 rhs(0:kr,1,0:kp)
       real*8 v(mgen),f(mgen)
@@ -1955,7 +1895,6 @@ c
       common /step/hr,hz,hp,hhr,hhz,hhp
       common /ints/ibeg,n1,n2,n3
       common /radius/r0,rmax
-ccc!$OMP THREADPRIVATE(/backup/,/arrays/)
 c
       nvs=10000
       nrel1=1
@@ -1982,7 +1921,7 @@ c
       call trans1(psif,v,ibeg(1),n1(1),n2(1),n3(1))
 c
       do 50 i=1,nvs
-c15aug06        if(i.gt.500)stop
+        if(i.gt.500)stop
 c       print*,'Sweep ',i
        if(i.ne.1)then
         do 31 is=0,nr
@@ -2071,7 +2010,7 @@ c----------------------------------------------------------------------c
       subroutine relax2(nrel,klev,nconv,nlev)
 c
       implicit real*8(a-h,o-z)
-      parameter(kr=420,kz=33,kp=3600,mgen=2000000)
+      parameter(kr=281,kz=33,kp=1210,mgen=500000)
       real*8 v(mgen),f(mgen)
       real*8 psic(0:kr,1,0:kp),psif(0:kr,1,0:kp)
       real*8 rc(0:kr,1,0:kp),rf(0:kr,1,0:kp),tempa(0:kr,1,0:kp)
@@ -2079,64 +2018,26 @@ c
       real*8 tdmaa(kp),tdmab(kp),tdmac(kp),tdmar(kp),tdmas(kp)
       real*8 pdmaa(kp),pdmab(kp),pdmac(kp),pdmad(kp),pdmae(kp),pdmas(kp)
       real*8 pdmar(kp)
-c8aug06
-      real*8 rvali(kr),rvalisq(kr)
-c8aug06
       integer ibeg(6),n1(6),n2(6),n3(6)
       common /backup/v,f
       common /arrays/psic,psif,rc,rf,tempa
       common /step/hr,hz,hp,hhr,hhz,hhp
       common /ints/ibeg,n1,n2,n3
       common /radius/r0,rmax
-ccc!$OMP THREADPRIVATE(/backup/,/arrays/)
 c
-      tolcon=10.d-6
+      tolcon=1.d-5
       nconv=0
 c
       call trans2(f,rf,ibeg(klev),n1(klev),n2(klev),n3(klev))
-c14aug06      call trans2(v,psif,ibeg(klev),n1(klev),n2(klev),n3(klev))
+      call trans2(v,psif,ibeg(klev),n1(klev),n2(klev),n3(klev))
 c
 c------------------------------relaxing with some G & S.
 c
       hhri=1./hhr(klev)
       hri=1./hr(klev)
       hhpi=1./hhp(klev)
-c15aug06 some initialisations; originally in the main loop 
-         do i=1,n1(klev)
-              rval=r0+(dble(i)-0.5d0)*hr(klev)
-              rvali(i)=1.d0/rval
-              rvalisq(i)=rvali(i)**2.
-            if(i.eq.1)then
-              pdmaa(i)=0.d0
-              pdmab(i)=0.d0
-              pdmac(i)=-2.d0*hhri-2.d0*hhpi*rvalisq(i)
-     +                 +rvalisq(i)       !mpk +1.d0/rval/hr(klev)
-              pdmad(i)=5.d0/3.d0*hhri+4.d0/3.d0*hri*rvali(i)
-              pdmae(i)=-0.2d0*hhri
-            elseif(i.eq.n1(klev))then
-              pdmaa(i)=-0.2d0*hhri
-              pdmab(i)=5.d0/3.d0*hhri-4.d0/3.d0*hri*rvali(i)
-              pdmac(i)=-2.d0*hhri-2.d0*hhpi*rvalisq(i)
-     +                +rvalisq(i)        !mpk -1.d0/rval/hr(klev)
-              pdmad(i)=0.d0
-              pdmae(i)=0.d0
-            else
-              pdmaa(i)=0.d0
-              pdmab(i)=hhri-1.5d0*hri*rvali(i)
-              pdmac(i)=-(2.d0*hhri+2.d0*hhpi*rvalisq(i))
-     +                +rvalisq(i)
-              pdmad(i)=hhri+1.5d0*hri*rvali(i)
-              pdmae(i)=0.d0
-            endif
-         enddo
-
-c         do 200 irel=1,nrel
-        do 200 irel=1,3
+      do 200 irel=1,nrel
 c                                 line relax in r-dir
-
-!$OMP PARALLEL 
-!$OMP+ PRIVATE(tdmaa,tdmab,tdmac,tdmar,tdmas,pdmar,pdmas,i,j,k,ka,km)
-!$OMP DO
         do 10 k=1,n3(klev)
 !mpk2d        do 10 j=1,n2(klev)
            j=1
@@ -2145,13 +2046,30 @@ c                                 line relax in r-dir
           if(k.eq.0)km=n3(klev)-1
           if(k.eq.n3(klev))ka=1
             do 11 i=1,n1(klev)
-c8aug06            rval=r0+(dble(i)-0.5d0)*hr(klev)  
-c8aug06            rvali=1.d0/rval
-              tdmaa(i)=pdmaa(i)
-              tdmab(i)=pdmab(i)
-              tdmac(i)=pdmac(i)
-              tdmar(i)=pdmad(i)
-              tdmas(i)=pdmae(i) 
+             rval=r0+(dble(i)-0.5d0)*hr(klev)  
+             rvali=1.d0/rval          
+            if(i.eq.1)then
+              pdmaa(i)=0.d0
+              pdmab(i)=0.d0
+              pdmac(i)=-2.d0*hhri-2.d0*hhpi*rvali**2
+     +                 +rvali**2       !mpk +1.d0/rval/hr(klev)
+              pdmad(i)=5.d0/3.d0*hhri+4.d0/3.d0*hri*rvali
+              pdmae(i)=-0.2d0*hhri
+            elseif(i.eq.n1(klev))then
+              pdmaa(i)=-0.2d0*hhri
+              pdmab(i)=5.d0/3.d0*hhri-4.d0/3.d0*hri*rvali
+              pdmac(i)=-2.d0*hhri-2.d0*hhpi*rvali**2
+     +                +rvali**2        !mpk -1.d0/rval/hr(klev)
+              pdmad(i)=0.d0
+              pdmae(i)=0.d0
+            else
+              pdmaa(i)=0.d0
+              pdmab(i)=hhri-1.5d0*hri*rvali
+              pdmac(i)=-(2.d0*hhri+2.d0*hhpi*rvali**2)
+     +                +rvali**2
+              pdmad(i)=hhri+1.5d0*hri*rvali
+              pdmae(i)=0.d0
+            endif
 c
 !mpk2d            if(j.eq.1)then
 !mpk2d             pdmac(i)=pdmac(i)-2.d0/hhz(klev)
@@ -2170,19 +2088,16 @@ c
 !mpk2d     +               /rval**2+rf(i,j,k)
 !mpk2d            endif
 c
-c8aug06                 pdmac(i)=pdmac(i)
+                 pdmac(i)=pdmac(i)
                  pdmar(i)=-(psif(i,j,ka)+psif(i,j,km))*hhpi
-     +               *rvalisq(i)+rf(i,j,k)
+     +               *rvali**2+rf(i,j,k)
    11     continue
-          call pdma(tdmaa,tdmab,tdmac,tdmar,tdmas,pdmar,pdmas,n1(klev))
+          call pdma(pdmaa,pdmab,pdmac,pdmad,pdmae,pdmar,pdmas,n1(klev))
           do 12 i=1,n1(klev)
             psif(i,j,k)=pdmas(i)
             if(k.eq.n3(klev))psif(i,j,0)=psif(i,j,k)
    12     continue
    10   continue
-!$OMP END DO
-
-!$OMP END PARALLEL
 c                                 line relax in z-dir
 !mpk2d        do 13 k=1,n3(klev)
 !mpk2d        do 13 i=1,n1(klev)
@@ -2298,33 +2213,29 @@ c
 c                                  Calculating residual.
 c
           resmax=0.d0
-!$OMP PARALLEL PRIVATE(ka,km,temp)
-!$OMP DO REDUCTION(MAX:resmax)
-          do 20 k=1,n3(klev)
           do 20 i=1,n1(klev)
-c8aug06             rval=r0+(dble(i)-0.5d0)*hr(klev)
-c8aug06             rvali=1.d0/rval
+             rval=r0+(dble(i)-0.5d0)*hr(klev)
+             rvali=1.d0/rval
              j=1
 !mpk2d          do 20 j=1,n2(klev)
-c8aug06         do 20 k=1,n3(klev)
+          do 20 k=1,n3(klev)
           ka=k+1
           km=k-1
           if(k.eq.0)km=n3(klev)-1
           if(k.eq.n3(klev))ka=1
           temp=(psif(i,j,ka)-2.d0*psif(i,j,k)+psif(i,j,km))
-     +        *hhpi*rvalisq(i)+psif(i,j,k)*rvalisq(i)
+     +        *hhpi*rvali**2+psif(i,j,k)*rvali**2
           if(i.eq.1)then
             temp=temp+(-2.d0*psif(i,j,k)+5.d0/3.d0*psif(i+1,j,k)-
      +           0.2d0*psif(i+2,j,k))*hhri+
-     +           4.d0/3.d0*psif(i+1,j,k)*hri*rvali(i)
+     +           4.d0/3.d0*psif(i+1,j,k)*hri*rvali
           elseif(i.eq.n1(klev))then
             temp=temp+(-2.d0*psif(i,j,k)+5.d0/3.d0*psif(i-1,j,k)
      +          -0.2d0*psif(i-2,j,k))*hhri-
-     +          4.d0/3.d0*psif(i-1,j,k)*hri*rvali(i)
+     +          4.d0/3.d0*psif(i-1,j,k)*hri*rvali
           else
             temp=temp+(psif(i-1,j,k)-2.d0*psif(i,j,k)+psif(i+1,j,k))
-     +          *hhri+1.5d0*(psif(i+1,j,k)-psif(i-1,j,k))
-     +          *hri*rvali(i)
+     +          *hhri+1.5d0*(psif(i+1,j,k)-psif(i-1,j,k))*hri*rvali
           endif
 c
 !mpk2d         if(j.eq.1)then
@@ -2341,11 +2252,8 @@ c
             temp=rf(i,j,k)-temp
             rc(i,j,k)=temp
             temp=dabs(temp)
-!ccc because of OMP            if(temp.gt.resmax)resmax=temp
-            resmax=MAX(resmax,temp)
+            if(temp.gt.resmax)resmax=temp
    20     continue
-!$OMP END DO
-!$OMP END PARALLEL 
 c
 c         if(klev.eq.1)write(6,*)klev,resmax
 c         if(klev.eq.1)call rufcon(vel,n1(klev),n2(klev),n3(klev))
@@ -2366,7 +2274,7 @@ c----------------------------------------------------------------------c
 c----------------------------------------------------------------------c
 c
       implicit real*8(a-h,o-z)
-      parameter(kr=420,kz=33,kp=3600,mgen=2000000)
+      parameter(kr=281,kz=33,kp=1210,mgen=500000)
       real*8 v(mgen),f(mgen)
       real*8 psic(0:kr,1,0:kp),psif(0:kr,1,0:kp)
       real*8 rc(0:kr,1,0:kp),rf(0:kr,1,0:kp),tempa(0:kr,1,0:kp)
@@ -2374,9 +2282,6 @@ c
       real*8 tdmaa(kp),tdmab(kp),tdmac(kp),tdmar(kp),tdmas(kp)
       real*8 pdmaa(kp),pdmab(kp),pdmac(kp),pdmad(kp),pdmae(kp),pdmas(kp)
       real*8 pdmar(kp)
-c8aug06
-      real*8 rvali(kr),rvalisq(kr)
-c8aug06
       integer ibeg(6),n1(6),n2(6),n3(6)
       common /backup/v,f
       common /arrays/psic,psif,rc,rf,tempa
@@ -2384,34 +2289,20 @@ c8aug06
       common /ints/ibeg,n1,n2,n3
       common /radius/r0,rmax
       common/iteration/kt
-ccc!$OMP THREADPRIVATE(/backup/,/arrays/)
 c
-      tolcon=10.d-6
+      tolcon=1.d-5
       nconv=0
 c
       call trans2(f,rf,ibeg(klev),n1(klev),n2(klev),n3(klev))
-c14aug06      call trans2(v,psif,ibeg(klev),n1(klev),n2(klev),n3(klev))
+      call trans2(v,psif,ibeg(klev),n1(klev),n2(klev),n3(klev))
 c
 c------------------------------relaxing with some G & S.
 c
       hhri=1./hhr(klev)
       hri=1./hr(klev)
       hhpi=1./hhp(klev)
-
-      do  i=1,n1(klev)-1
-       rval=dble(i)*hr(klev)+r0
-       rvali(i)=1./rval
-       rvalisq(i)=rvali(i)**2.
-       pdmaa(i)=hhri-1.5d0*hri*rvali(i)
-       pdmab(i)=-(2.d0*hhri-rvalisq(i)+2.d0*hhpi*rvalisq(i))
-       pdmac(i)=hhri+1.5d0*hri*rvali(i)
-      enddo
-c       do 200 irel=1,nrel
-       do 200 irel=1,3
+      do 200 irel=1,nrel
 c                                 line relax in r-dir        
-!$OMP PARALLEL 
-!$OMP+ PRIVATE(tdmaa,tdmab,tdmac,tdmar,tdmas,i,j,k,ka,km)
-!$OMP DO
         do 10 k=1,n3(klev)
 !mpk2d        do 10 j=1,n2(klev)
           j=1
@@ -2419,11 +2310,11 @@ c                                 line relax in r-dir
           km=k-1
           if(k.eq.n3(klev))ka=1
           do 11 i=1,n1(klev)-1
-c8aug06            rval=dble(i)*hr(klev)+r0
-c8aug06            rvali=1./rval
-             tdmaa(i)=pdmaa(i)
-             tdmab(i)=pdmab(i)
-             tdmac(i)=pdmac(i)
+            rval=dble(i)*hr(klev)+r0
+            rvali=1./rval
+            tdmaa(i)=hhri-1.5d0*hri*rvali
+            tdmab(i)=-(2.d0*hhri-rvali**2+2.d0*hhpi*rvali**2)
+            tdmac(i)=hhri+1.5d0*hri*rvali
 !mpk2d            if(j.eq.1)then
 !mpk2d              tdmab(i)=tdmab(i)-2.d0/hhz(klev)
 !mpk2d              tdmar(i)=-(5.d0*psif(i,j+1,k)/3.d0-0.2*psif(i,j+2,k))
@@ -2440,8 +2331,8 @@ c8aug06            rvali=1./rval
 !mpk2d     +               -(psif(i,j,ka)+psif(i,j,km))/hhp(klev)
 !mpk2d     +               /rval**2+rf(i,j,k)
 !mpk2d            endif
-c8aug06             tdmab(i)=tdmab(i)
-              tdmar(i)=-(psif(i,j,ka)+psif(i,j,km))*hhpi*rvalisq(i)
+              tdmab(i)=tdmab(i)
+              tdmar(i)=-(psif(i,j,ka)+psif(i,j,km))*hhpi*rvali**2 
      +                 +rf(i,j,k)
    11     continue
           call tdma(tdmaa,tdmab,tdmac,tdmas,tdmar,n1(klev)-1)
@@ -2450,9 +2341,6 @@ c8aug06             tdmab(i)=tdmab(i)
             if(k.eq.n3(klev))psif(i,j,0)=psif(i,j,k)
    12     continue
    10   continue
-!$OMP END DO
-!$OMP END PARALLEL
-
 c                                 line relax in z-dir
 !mpk2d        do 13 k=1,n3(klev)
 !mpk2d        do 13 i=1,n1(klev)-1
@@ -2544,23 +2432,20 @@ c
 c                                 Calculating residual.
 c
           resmax=0.d0
-!$OMP PARALLEL PRIVATE(ka,km,temp)
-!$OMP DO REDUCTION(MAX:resmax)
-          do 20 k=1,n3(klev)
           do 20 i=1,n1(klev)-1
-c8aug06            rval=dble(i)*hr(klev)+r0
-c8aug06            rvali=1./rval
+            rval=dble(i)*hr(klev)+r0
+            rvali=1./rval
 !mpk2d          do 20 j=1,n2(klev)
            j=1
-c8aug06          do 20 k=1,n3(klev)
+          do 20 k=1,n3(klev)
           ka=k+1
           km=k-1
           if(k.eq.n3(klev))ka=1
           temp=(psif(i+1,j,k)+psif(i-1,j,k))*hhri
      +        +1.5d0*(psif(i+1,j,k)-psif(i-1,j,k))*hri
-     +        *rvali(i)+psif(i,j,k)*rvalisq(i)
-     +        +(psif(i,j,ka)+psif(i,j,km))*hhpi*rvalisq(i)
-     +        -psif(i,j,k)*(2.d0*hhri+2.d0*hhpi*rvalisq(i))
+     +        *rvali+psif(i,j,k)*rvali**2
+     +        +(psif(i,j,ka)+psif(i,j,km))*hhpi*rvali**2
+     +        -psif(i,j,k)*(2.d0*hhri+2.d0*hhpi*rvali**2)
 !mpk2d          if(j.eq.1)then
 !mpk2d            temp=temp+(-2.d0*psif(i,j,k)+5.d0*psif(i,j+1,k)/3.d0
 !mpk2d     +          -0.2d0*psif(i,j+2,k))/hhz(klev)
@@ -2574,11 +2459,8 @@ c8aug06          do 20 k=1,n3(klev)
             temp=rf(i,j,k)-temp
             rc(i,j,k)=temp
             temp=dabs(temp)
-!ccc because of OMP            if(temp.gt.resmax)resmax=temp
-            resmax=MAX(temp,resmax)
+            if(temp.gt.resmax)resmax=temp
    20     continue
-!$OMP END DO
-!$OMP END PARALLEL
 c
 c         if(klev.eq.1)write(6,100)klev,resmax
 c         write(6,100)klev,resmax
@@ -2598,7 +2480,7 @@ c----------------------------------------------------------------------c
 c----------------------------------------------------------------------c
 c
       implicit real*8(a-h,o-z)
-      parameter(kr=420,kz=33,kp=3600,mgen=2000000)
+      parameter(kr=281,kz=33,kp=1210,mgen=500000)
       real*8 v(mgen),f(mgen)
       real*8 psic(0:kr,1,0:kp),psif(0:kr,1,0:kp)
       real*8 rc(0:kr,1,0:kp),rf(0:kr,1,0:kp),tempa(0:kr,1,0:kp)
@@ -2608,19 +2490,15 @@ c
       common /arrays/psic,psif,rc,rf,tempa
       common /step/hr,hz,hp,hhr,hhz,hhp
       common /ints/ibeg,n1,n2,n3
-ccc!$OMP THREADPRIVATE(/backup/,/arrays/)
 c
 c------------------Start off with restriction
 c
       call trans3(rc,rf,n1(klev),n2(klev),n3(klev))
 c
-!$OMP PARALLEL PRIVATE(ii,kk,iip,iim,kkp,kkm,temp)
-!$OMP DO
-      do 10 k=1,n3(klev+1)-1
       do 10 i=1,n1(klev+1)-1
 !mpk2d      do 10 j=1,n2(klev+1)-1
        j=1
-c8aug06      do 10 k=1,n3(klev+1)-1
+      do 10 k=1,n3(klev+1)-1
         ii=i+i
 !mpk2d     jj=j+j
         jj=1
@@ -2637,9 +2515,6 @@ c8aug06      do 10 k=1,n3(klev+1)-1
 !mpk2d        if(k.eq.n3(klev+1))kkp=1
 c
         psic(i,j,k)=0.d0
-c14aug06 beg
-        psif(i,j,k)=0.d0
-c14aug06
 c
         temp=rf(ii,jj,kk)
         temp=temp+temp+rf(iip,jj,kk)+rf(iim,jj,kk)
@@ -2659,8 +2534,6 @@ c        temp=temp/64.d0
         temp=temp*0.015625d0
         rc(i,j,k)=temp
    10 continue
-!$OMP END DO
-!$OMP END PARALLEL
 c
 c-----------setting faces to zero
 c
@@ -2671,10 +2544,6 @@ c
         rc(n1(klev+1),j,k)=0.d0
         psic(0,j,k)=0.d0
         psic(n1(klev+1),j,k)=0.d0
-c14aug06 beg
-        psif(0,j,k)=0.d0
-        psif(n1(klev+1),j,k)=0.d0
-c14aug06
    20 continue
 c
 !mpk2d      do 30 i=0,n1(klev+1)
@@ -2693,18 +2562,8 @@ c       psic(i,j,0)=0.d0
 c       psic(i,j,n3(klev+1))=0.d0
 c  40 continue
 c
-c14aug06 discovery of a bug?
-       do i=0,n1(klev+1)
-c        rc(i,1,0)=0.d0
-c        rc(i,1,n3(klev+1))=0.d0
-        psic(i,1,0)=0.d0
-        psic(i,1,n3(klev+1))=0.d0 
-        psif(i,1,0)=0.d0
-        psif(i,1,n3(klev+1))=0.d0 
-       enddo
-c14aug06 
       call trans1(rc,f,ibeg(klev+1),n1(klev+1),n2(klev+1),n3(klev+1))
-c14aug06      call trans1(psic,v,ibeg(klev+1),n1(klev+1),n2(klev+1),n3(klev+1))
+      call trans1(psic,v,ibeg(klev+1),n1(klev+1),n2(klev+1),n3(klev+1))
 c
 c     print*,'In corser:    PSI then R'
 c     call rufcon(psic,n1(klev+1),n2(klev+1),n3(klev+1))
@@ -2718,7 +2577,7 @@ c----------------------------------------------------------------------c
 c----------------------------------------------------------------------c
 c
       implicit real*8(a-h,o-z)
-      parameter(kr=420,kz=33,kp=3600,mgen=2000000)
+      parameter(kr=281,kz=33,kp=1210,mgen=500000)
       real*8 v(mgen),f(mgen)
       real*8 psic(0:kr,1,0:kp),psif(0:kr,1,0:kp)
       real*8 rc(0:kr,1,0:kp),rf(0:kr,1,0:kp),tempa(0:kr,1,0:kp)
@@ -2728,19 +2587,15 @@ c
       common /arrays/psic,psif,rc,rf,tempa
       common /step/hr,hz,hp,hhr,hhz,hhp
       common /ints/ibeg,n1,n2,n3
-ccc!$OMP THREADPRIVATE(/backup/,/arrays/)
 c
       call trans2(v,psic,ibeg(klev),n1(klev),n2(klev),n3(klev))
 c
 c--------------------prolongation
 c
-c19sept06      do 10 i=0,n1(klev-1)
+      do 10 i=0,n1(klev-1)
 !mpk2d      do 10 j=0,n2(klev-1)
       j=1
-!$OMP PARALLEL PRIVATE(i1,k1,i2,k2)
-!$OMP DO
       do 10 k=0,n3(klev-1)
-      do 10 i=0,n1(klev-1)
         i1=i/2
 !mpk2d        j1=j/2
         j1=1
@@ -2784,32 +2639,27 @@ c19sept06      do 10 i=0,n1(klev-1)
 !mpk2d           end if
         end if
    10 continue
-!$OMP END DO
-!$OMP END PARALLEL
 c
       call trans2(v,tempa,ibeg(klev-1),n1(klev-1),n2(klev-1),n3(klev-1))
 c
-      do 20 k=0,n3(klev-1)
       do 20 i=0,n1(klev-1)
 !mpk2d      do 20 j=0,n2(klev-1)
       j=1
-c8aug06      do 20 k=0,n3(klev-1)
+      do 20 k=0,n3(klev-1)
         psif(i,j,k)=psif(i,j,k)+tempa(i,j,k)
         psic(i,j,k)=0.d0
    20 continue
-c14aug06      call trans1(psic,v,ibeg(klev),n1(klev),n2(klev),n3(klev))
-c14aug06      call trans1(psif,v,ibeg(klev-1),n1(klev-1),n2(klev-1),n3(klev-1))
+      call trans1(psic,v,ibeg(klev),n1(klev),n2(klev),n3(klev))
+      call trans1(psif,v,ibeg(klev-1),n1(klev-1),n2(klev-1),n3(klev-1))
       return
       end
 c==================================================
       subroutine trans1(a3d,a1d,i1,n1,n2,n3)
       implicit real*8(a-h,o-z)
-      parameter(kr=420,kz=33,kp=3600,mgen=2000000)
+      parameter(kr=281,kz=33,kp=1210,mgen=500000)
       real*8 a3d(0:kr,1,0:kp),a1d(mgen)
 c
       iimax=0
-!$OMP PARALLEL PRIVATE(ii,k,i)
-!$OMP DO
       do 10 k=0,n3
 !mpk2d      do 10 j=0,n2
        j=1
@@ -2822,9 +2672,6 @@ c
 !mpk        endif        
         a1d(ii)=a3d(i,j,k)
    10 continue
-!$OMP END DO
-!$OMP END PARALLEL
-
 !mpk        if(ii.gt.317000)then
 !mpk          print*,'FATAL ERROR IN MULTIGRID  ii='
 !mpk          STOP
@@ -2835,11 +2682,9 @@ c
 c==================================================
       subroutine trans2(a1d,a3d,i1,n1,n2,n3)
       implicit real*8(a-h,o-z)
-      parameter(kr=420,kz=33,kp=3600,mgen=2000000)
+      parameter(kr=281,kz=33,kp=1210,mgen=500000)
       real*8 a3d(0:kr,1,0:kp),a1d(mgen)
 c
-!$OMP PARALLEL PRIVATE(ii,i,k)
-!$OMP DO
       do 10 k=0,n3
 !mpk2d       do 10 j=0,n2
       j=1
@@ -2848,26 +2693,20 @@ c
          ii=k*(n1+1) + i + i1
         a3d(i,j,k)=a1d(ii)
    10 continue
-!$OMP END DO
-!$OMP END PARALLEL 
       return
       end
 c==================================================
       subroutine trans3(a3d1,a3d2,n1,n2,n3)
       implicit real*8(a-h,o-z)
-      parameter(kr=420,kz=33,kp=3600,mgen=2000000)
+      parameter(kr=281,kz=33,kp=1210,mgen=500000)
       real*8 a3d1(0:kr,1,0:kp),a3d2(0:kr,1,0:kp)
 c
-!$OMP PARALLEL 
-!$OMP DO
       do 10 k=0,n3
 !mpk2d      do 10 j=0,n2
       j=1
       do 10 i=0,n1
         a3d2(i,j,k)=a3d1(i,j,k)
    10 continue
-!$OMP END DO
-!$OMP END PARALLEL 
       return
       end
 c==================================================
@@ -3132,8 +2971,6 @@ c==================================================
       implicit real*8(a-h,o-z)
       real*8 a(n),b(n),c(n),d(n),e(n)
       real*8 r(n),x(n)
-
-
 c
 c     Solves a  pentadiagonal matrix system:
 c     Solves a  pentadiagonal matrix system:
@@ -3174,7 +3011,6 @@ c
       do 20 j=n-2,1,-1
         x(j)=r(j)-d(j)*x(j+1)-e(j)*x(j+2)
    20 continue
-
 c
       return
       end
