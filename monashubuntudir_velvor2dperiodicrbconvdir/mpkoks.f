@@ -766,7 +766,8 @@ c forward timestepping just for first timestep
 !mpkrb        RHS1=Crra+Cra*ri+Chha*(ri**2)+C(i,j,k)/(Ptl*dt)
         RHS1=Crra+Chha*(ri**2)+C(i,j,k)/(Ptl*dt)
         ULT=(u*Cr+v*Ch*ri)/Ptl
-        RHS2=-Ra*thh
+!mpkoks        RHS2=-Ra*thh*0.707106781-Ra*thr*0.707106781
+        RHS2=-Ra*thr*0.707106781
 !mpkrb       +2.d0*Ra*(-thr*u-thh*v*ri)/Re/Ptl
         cf1=1.d0/(Ptl*dt)-cnr-cnh
         cf2=cnr+cnh
@@ -970,7 +971,8 @@ c back to truly leapfrog/Dufort-Frankel
 !mpkrb        RHS1=Crra+Cra*ri+Chha*(ri**2)+0.5d0*Cp(i,j,k)/(Ptl*dt)
         RHS1=Crra+Chha*(ri**2)+0.5d0*C(i,j,k)/(Ptl*dt)
         ULT=(u*Cr+v*Ch*ri)/Ptl
-        RHS2=-Ra*thh
+!mpkoks        RHS2=-Ra*thh
+        RHS2=-Ra*thr*0.707106781
 !mpkrb      +2.d0*Ra*(-thr*u-thh*v*ri)/Re/Ptl
         cf1=0.5d0/(Ptl*dt)-cnr-cnh
         cf2=cnr+cnh
